@@ -16,8 +16,18 @@
 	<property name="pathImageJ" location="${work}/imagej/ij.jar" />
 	<echo message="pathImageJ= ${pathImageJ}" />
 
-	<property name="pathIW2AYV" location="${work}\iw2ayv\iw2ayv\dist\iw2ayv.jar" />
+	
+	<!-- in questo modo posso utilizzare le wildcards per il nome del file-->
+	<path id="pathIW2AYVxx">
+		<fileset dir="${work}\iw2ayv\iw2ayv\dist\">
+			<include name="iw2ayv*.jar" />
+		</fileset>
+	</path>
+	<property name="pathIW2AYV" refid="pathIW2AYVxx" />
 	<echo message="pathIW2AYV= ${pathIW2AYV}" />
+
+	<!--property name="pathIW2AYV" location="${work}\iw2ayv\iw2ayv\dist\iw2ayv.jar" />
+	<echo message="pathIW2AYV= ${pathIW2AYV}" /-->
 
 	<property name="output" location="build" />
 	<property name="source" location="src/sorter" />
@@ -51,8 +61,6 @@
 		<property name="productDirWIN7" location="${disk}/Programmi2\ImageJ\plugins" />
 		<available file="${productDirWIN7}" type="dir" property="win7" />
 		<echo message="win7=${win7}" />
-
-
 	</target>
 
 	<!-- COPY1 plugins.config to output -->

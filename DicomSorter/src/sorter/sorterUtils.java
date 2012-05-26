@@ -22,6 +22,8 @@ public class sorterUtils {
 
 	private final static String DICOM_ACQUISITION_TIME = "0008,0032";
 
+	private final static String DICOM_PROTOCOL_NAME = "0008,1030";
+
 	private final static String DICOM_SERIES_DESCRIPTION = "0008,103E";
 
 	private final static String DICOM_STUDY_ID = "0020,0010";
@@ -58,13 +60,15 @@ public class sorterUtils {
 		ArrayList<String> vetAcq = tabella.get(8);
 		ArrayList<String> vetAcqTime = tabella.get(9);
 		ArrayList<String> vetCoil = tabella.get(10);
+		ArrayList<String> vetProtocolName = tabella.get(11);
+
 		// IJ.log("sono state confermate " + vetNomi.size()
 		// + " immagini da sistemare");
 
 		// new WaitForUserDialog("pause").show();
 
 		for (int i1 = 0; i1 < vetNomi.size(); i1++) {
-			// IJ.log("eseguo il passo numero " + i1);
+			IJ.log("eseguo il passo numero " + i1);
 			// Create a directory; all ancestor directories must exist
 
 			String directoryPatientName = filePath + vetNomi.get(i1);
@@ -77,9 +81,21 @@ public class sorterUtils {
 					+ studyName;
 			boolean success2 = sorterUtils.createDirectory(directoryStudyName);
 
-			String seriesName = "Series_" + vetSeries.get(i1) + "_"
-					+ vetSeriesDescription.get(i1);
+			String aux12 = vetProtocolName.get(i1).trim();
+			String aux11 = vetSeriesDescription.get(i1).trim();
+			String aux13 = aux11 + aux12;
+
+			String seriesName = "Series_" + vetSeries.get(i1) + "_" + aux13;
+
 			String directorySeriesName = directoryStudyName + "\\" + seriesName;
+
+			IJ.log("directoryPatientName= " + directoryPatientName);
+			IJ.log("studyName= " + studyName);
+			IJ.log("directoryStudyName= " + directoryStudyName);
+			IJ.log("seriesName= " + seriesName);
+			IJ.log("directorySeriesName= " + directorySeriesName);
+
+			// new WaitForUserDialog("001 Do something, then click OK.").show();
 
 			boolean success3 = sorterUtils.createDirectory(directorySeriesName);
 
@@ -266,6 +282,7 @@ public class sorterUtils {
 		ArrayList<String> vetAcq = new ArrayList<String>();
 		ArrayList<String> vetAcqTime = new ArrayList<String>();
 		ArrayList<String> vetCoil = new ArrayList<String>();
+		ArrayList<String> vetProtocolName = new ArrayList<String>();
 		Opener o1 = new Opener();
 
 		for (int i1 = 0; i1 < list.size(); i1++) {
@@ -288,6 +305,7 @@ public class sorterUtils {
 			vetAcq.add(readDicomParameter(imp1, DICOM_ACQUISITION_NUMBER));
 			vetAcqTime.add(readDicomParameter(imp1, DICOM_ACQUISITION_TIME));
 			vetCoil.add(readDicomParameter(imp1, DICOM_COIL));
+			vetProtocolName.add(readDicomParameter(imp1, DICOM_PROTOCOL_NAME));
 			// System.out.println("vetCoil= " + readDicomParameter(imp1,
 			// DICOM_COIL));
 			// }
@@ -303,6 +321,7 @@ public class sorterUtils {
 		myList.add(vetAcq);
 		myList.add(vetAcqTime);
 		myList.add(vetCoil);
+		myList.add(vetProtocolName);
 
 		return myList;
 
