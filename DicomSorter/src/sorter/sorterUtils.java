@@ -161,12 +161,12 @@ public class sorterUtils {
 				} else {
 					boolean exist2 = false;
 					// verifico inoltre se il nome da assegnare al file da
-					// spostare esista già nella dierctory destinazione, in
+					// spostare esista giï¿½ nella dierctory destinazione, in
 					// questo caso aggiungo, tramite renameFile un numero
 					// crescente.
 					// Rieffettuo il controllo, eventualmente continuando ad
-					// aumentare il numero da aggiungere (loop), finchè il nuovo
-					// nome non esista più nella directory destinazione.
+					// aumentare il numero da aggiungere (loop), finchï¿½ il nuovo
+					// nome non esista piï¿½ nella directory destinazione.
 					int loop = 0;
 
 					// verifico che il nuovo file and path non abbiano caratteri
@@ -352,7 +352,7 @@ public class sorterUtils {
 
 	/**
 	 * La seguente routine, che si occupa di estrarre dati dall'header delle
-	 * immagini è tratta da QueryDicomHeader.java di Anthony Padua & Daniel
+	 * immagini ï¿½ tratta da QueryDicomHeader.java di Anthony Padua & Daniel
 	 * Barboriak - Duke University Medical Center. *** modified version ***
 	 * Alberto Duina - Spedali Civili di Brescia - Servizio di Fisica Sanitaria
 	 * 2006
@@ -421,7 +421,7 @@ public class sorterUtils {
 	}
 
 	/***
-	 * cancellazione alternativa di directory piena, ma forse è deleteria, a noi
+	 * cancellazione alternativa di directory piena, ma forse ï¿½ deleteria, a noi
 	 * serve di cancellare solo directory vuote, i file devono essere tutti
 	 * spostati in altro luogo
 	 * 
