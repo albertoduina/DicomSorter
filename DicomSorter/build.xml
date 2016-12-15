@@ -15,8 +15,8 @@
 
 	<property name="pathImageJ" location="${work}/imagej/ij.jar" />
 	<echo message="pathImageJ= ${pathImageJ}" />
+	<property name="dist" location="dist" />
 
-	
 	<!-- in questo modo posso utilizzare le wildcards per il nome del file-->
 	<path id="pathIW2AYVxx">
 		<fileset dir="${work}\iw2ayv\iw2ayv\dist\">
@@ -37,7 +37,7 @@
 
 
 	<!-- ##############			MAIN ROUTINE 		############## -->
-	<target name="main" depends="init, compile, copy1, jar, cond_INS, cond_OLD, cond_WIN7" />
+	<target name="main" depends="init, compile, copy1, jar, distribution, cond_INS, cond_OLD, cond_WIN7" />
 	<!--target name="main" depends="init, compile, copy1, jar,  moveJar, production" / -->
 
 	<!-- COMPILE java classes -->
@@ -49,6 +49,9 @@
 	<target name="init" description="Initialize">
 		<delete dir="${output}" />
 		<mkdir dir="${output}" />
+
+		<delete dir="${dist}" />
+		<mkdir dir="${dist}" />
 
 		<property name="productDirINSIDE" location="${work}\imagej\Plugins" />
 		<available file="${productDirINSIDE}" type="dir" property="ins" />
@@ -77,8 +80,11 @@
 	<target name="jar" depends="compile">
 		<jar jarfile="${output}/MyDicomSorter_.jar" basedir="${output}" />
 	</target>
-
-
+	<target name="distribution" description="Jar distribution">
+		<copy todir="${dist}">
+			<fileset dir="${output}" includes="*.jar" />
+		</copy>
+	</target>
 	<target name="cond_INS" depends="init" if="ins">
 		<echo message="Eseguo cond_INS" />
 		<delete dir="${productDirINSIDE}/DicomSorter" />

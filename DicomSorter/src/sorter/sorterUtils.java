@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.io.Opener;
+import ij.plugin.DICOM;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,30 +68,26 @@ public class sorterUtils {
 				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
 				String studyDate = readDicomParameter(imp1, DICOM_STUDY_DATE);
 				String seriesNum = readDicomParameter(imp1, DICOM_SERIES_NUMBER);
-				String seriesDescription = readDicomParameter(imp1,
-						DICOM_SERIES_DESCRIPTION);
+				String seriesDescription = readDicomParameter(imp1, DICOM_SERIES_DESCRIPTION);
 				String imaNum = readDicomParameter(imp1, DICOM_IMAGE_NUMBER);
-				String acqNum = readDicomParameter(imp1,
-						DICOM_ACQUISITION_NUMBER);
-				String acqTime = readDicomParameter(imp1,
-						DICOM_ACQUISITION_TIME);
+				String acqNum = readDicomParameter(imp1, DICOM_ACQUISITION_NUMBER);
+				String acqTime = readDicomParameter(imp1, DICOM_ACQUISITION_TIME);
 				String coil = readDicomParameter(imp1, DICOM_COIL);
-				String protocolName = readDicomParameter(imp1,
-						DICOM_PROTOCOL_NAME);
+				String protocolName = readDicomParameter(imp1, DICOM_PROTOCOL_NAME);
 				String fileName = imp1.getTitle();
 				// IJ.log("eseguo il passo numero " + i1);
 				// Create a directory; all ancestor directories must exist
+				patName = patName.replace(" ", "_");
 
 				String directoryPatientName = filePath + patName;
-				boolean success1 = sorterUtils
-						.createDirectory(directoryPatientName);
+				// MyLog.waitHere("directoryPatientName=
+				// "+directoryPatientName);
+				boolean success1 = sorterUtils.createDirectory(directoryPatientName);
 				if (!success1)
 					IJ.error("error in createDirectory");
 				String studyName = "Study_" + studyID + "_" + studyDate;
-				String directoryStudyName = filePath + patName + "\\"
-						+ studyName;
-				boolean success2 = sorterUtils
-						.createDirectory(directoryStudyName);
+				String directoryStudyName = filePath + patName + "\\" + studyName;
+				boolean success2 = sorterUtils.createDirectory(directoryStudyName);
 				if (!success2)
 					IJ.error("error in createDirectory");
 				String aux12 = protocolName;
@@ -125,8 +122,7 @@ public class sorterUtils {
 				// IJ.log("directoryStudyName= " + directoryStudyName);
 				// IJ.log("seriesName= " + seriesName);
 				// IJ.log("directorySeriesName= " + directorySeriesName);
-				boolean success3 = sorterUtils
-						.createDirectory(directorySeriesName);
+				boolean success3 = sorterUtils.createDirectory(directorySeriesName);
 				if (!success3) {
 					IJ.error("create dir problems " + directorySeriesName);
 				} else {
@@ -152,8 +148,7 @@ public class sorterUtils {
 					// IJ.log(seriesDescription);
 					String aux1 = seriesDescription;
 					if (aux1.length() >= 5) {
-						oldName2 = oldName2 + "_"
-								+ seriesDescription.substring(0, 5);
+						oldName2 = oldName2 + "_" + seriesDescription.substring(0, 5);
 					}
 				}
 				String newName = "";
@@ -176,7 +171,8 @@ public class sorterUtils {
 					// MyLog.waitHere("oldName= "+oldName);
 					File newfile2 = new File(destDir, oldName);
 					// IJ.log("oldName= "+oldName+" newFile2= "+newfile2);
-					// MyLog.waitHere("oldName= "+oldName+" newFile2= "+newfile2);
+					// MyLog.waitHere("oldName= "+oldName+" newFile2=
+					// "+newfile2);
 
 					// String nuovo = filterChar(newfile2.toString());
 					// if (!nuovo.equals(newfile2.toString()))
@@ -186,8 +182,7 @@ public class sorterUtils {
 					exist2 = newfile2.exists();
 					while (exist2) {
 						loop++;
-						newName = sorterUtils.renameFileProgressive(oldName,
-								loop);
+						newName = sorterUtils.renameFileProgressive(oldName, loop);
 						newfile2 = new File(destDir, newName);
 						exist2 = newfile2.exists();
 					}
@@ -208,8 +203,7 @@ public class sorterUtils {
 							if (newfile2.equals(moveCandidate))
 								MyLog.waitHere("SAME");
 
-							IJ.error("move problems " + moveCandidate + " in "
-									+ newfile2);
+							IJ.error("move problems " + moveCandidate + " in " + newfile2);
 							MyLog.waitHere("potential lock-up");
 							return false;
 						}
@@ -255,7 +249,7 @@ public class sorterUtils {
 			if (f1.isDirectory()) {
 				count = count + countFiles(path1);
 			} else {
-				// IJ.redirectErrorMessages();
+				IJ.redirectErrorMessages();
 				if (ReadDicom.isDicomImage(path1))
 					count++;
 			}
@@ -283,7 +277,7 @@ public class sorterUtils {
 			if (f1.isDirectory()) {
 				count = count + countFiles(path1);
 			} else {
-				// IJ.redirectErrorMessages();
+				IJ.redirectErrorMessages();
 				count++;
 			}
 		}
@@ -342,7 +336,7 @@ public class sorterUtils {
 			if (f1.isDirectory()) {
 				list3.addAll(listFiles(path1));
 			} else {
-				// IJ.redirectErrorMessages();
+				IJ.redirectErrorMessages();
 				if (ReadDicom.isDicomImage(path1))
 					list3.add(path1);
 			}
@@ -373,8 +367,7 @@ public class sorterUtils {
 			return (null);
 		int currSlice = imp.getCurrentSlice();
 		ImageStack stack = imp.getStack();
-		String header = stack.getSize() > 1 ? stack.getSliceLabel(currSlice)
-				: (String) imp.getProperty("Info");
+		String header = stack.getSize() > 1 ? stack.getSliceLabel(currSlice) : (String) imp.getProperty("Info");
 		if (header != null) {
 			int idx1 = header.indexOf(userInput);
 			int idx2 = header.indexOf(":", idx1);
@@ -624,7 +617,7 @@ public class sorterUtils {
 	// fileDirDestinazione.mkdir();
 	// }
 	// if (fileDirDestinazione.exists()) {
-	// IJ.log("sorgente= " + nomeFile + "  destinazione= "
+	// IJ.log("sorgente= " + nomeFile + " destinazione= "
 	// + dirDestinazione);
 	// success = fileSorgente
 	// .renameTo(new File(dirDestinazione, nomeFile));
@@ -656,14 +649,11 @@ public class sorterUtils {
 			fileDirDestinazione.mkdir();
 		}
 		if (fileDirDestinazione.exists()) {
-			IJ.log("sorgente= " + nomeFile + "  destinazione= "
-					+ dirDestinazione);
-			success = fileSorgente
-					.renameTo(new File(dirDestinazione, nomeFile));
+			IJ.log("sorgente= " + nomeFile + "  destinazione= " + dirDestinazione);
+			success = fileSorgente.renameTo(new File(dirDestinazione, nomeFile));
 		}
 		if (!success) {
-			MyLog.waitHere("File " + nomeFile
-					+ " was not successfully moved to " + dirDestinazione);
+			// MyLog.waitHere("File " + nomeFile + " was not successfully moved to " + dirDestinazione);
 		}
 		return success;
 	}
@@ -688,14 +678,11 @@ public class sorterUtils {
 			fileDirDestinazione.mkdir();
 		}
 		if (fileDirDestinazione.exists()) {
-			MyLog.waitHere("sorgente= " + nomeFile + "  destinazione= "
-					+ dirDestinazione);
-			success = fileSorgente
-					.renameTo(new File(dirDestinazione, nomeFile));
+			MyLog.waitHere("sorgente= " + nomeFile + "  destinazione= " + dirDestinazione);
+			success = fileSorgente.renameTo(new File(dirDestinazione, nomeFile));
 		}
 		if (!success) {
-			MyLog.waitHere("File " + nomeFile
-					+ " was not successfully moved to " + dirDestinazione);
+			MyLog.waitHere("File " + nomeFile + " was not successfully moved to " + dirDestinazione);
 		}
 		return success;
 	}
@@ -709,8 +696,7 @@ public class sorterUtils {
 	 *            directory destinazione in cui spostare tutti i files
 	 * @return true se ok
 	 */
-	public static boolean mainDESorterMethod2(String sourceDir,
-			String destinationDir) {
+	public static boolean mainDESorterMethod2(String sourceDir, String destinationDir) {
 		long totale = sorterUtils.countFiles(sourceDir);
 		ArrayList<String> lista = sorterUtils.listFiles(sourceDir);
 		String[] sourcePathVector = ArrayUtils.arrayListToArrayString(lista);
@@ -744,11 +730,17 @@ public class sorterUtils {
 	 * @return true se ok
 	 */
 	public static boolean mainRENumberMethod(String renumberDir) {
-		long totale = sorterUtils.countDicomFiles(renumberDir);
+
+		// IJ.log("inizio");
+		// long totale = sorterUtils.countDicomFiles(renumberDir);
+		// IJ.log("totale= " + totale);
 		ArrayList<String> lista = sorterUtils.listDicomFiles(renumberDir);
+		IJ.log("fine lista");
 		String[] sourcePathVector = ArrayUtils.arrayListToArrayString(lista);
 		boolean ok = true;
 		for (int i1 = 0; i1 < sourcePathVector.length; i1++) {
+			IJ.log("renumber file  " + i1);
+
 			boolean ok1 = false;
 			String sourcePath = sourcePathVector[i1];
 			File file1 = new File(sourcePath);
@@ -759,9 +751,10 @@ public class sorterUtils {
 			ok1 = file1.renameTo(file2);
 			if (ok1 == false)
 				ok = false;
-			else
-				IJ.showStatus("renumber file  " + i1 + "/" + totale);
+			// else
+			// IJ.showStatus("renumber file " + i1 + "/" + totale);
 		}
+
 		return ok;
 	}
 
@@ -774,8 +767,7 @@ public class sorterUtils {
 	 *            directory destinazione in cui spostare tutti i files
 	 * @return true se ok
 	 */
-	public static boolean mainDESorterMethod(String sourceDir,
-			String destinationDir) {
+	public static boolean mainDESorterMethod(String sourceDir, String destinationDir) {
 		long totale = sorterUtils.countFiles(sourceDir);
 		ArrayList<String> lista = sorterUtils.listFiles(sourceDir);
 		String[] sourcePathVector = ArrayUtils.arrayListToArrayString(lista);
@@ -842,8 +834,7 @@ public class sorterUtils {
 		return fileName;
 	}
 
-	public static boolean copyDirectoryWithFiles(String srcFolder,
-			String destFolder) {
+	public static boolean copyDirectoryWithFiles(String srcFolder, String destFolder) {
 
 		boolean ok = false;
 		if (!(new File(srcFolder).exists())) {
@@ -873,8 +864,7 @@ public class sorterUtils {
 				dest.mkdir();
 				if (!dest.exists())
 					ok = false;
-				System.out.println("Directory copied from " + src + "  to "
-						+ dest);
+				System.out.println("Directory copied from " + src + "  to " + dest);
 			}
 
 			// list all the directory contents
