@@ -3,7 +3,6 @@
 
 	<!-- Definizioni property -->
 	<property environment="env" />
-
 	<property name="disk" value="${env.SystemDrive}" />
 
 	<echo message="basedir= ${basedir}" />
@@ -47,6 +46,9 @@
 
 	<!-- INITIALIZE delete and recreate empy directory -->
 	<target name="init" description="Initialize">
+		<buildnumber />
+		<tstamp />
+
 		<delete dir="${output}" />
 		<mkdir dir="${output}" />
 
@@ -75,6 +77,15 @@
 	<!-- Create JAR application  -->
 	<property name="project.name" value="DicomSorter_" />
 	<property name="project.version" value="1.1" />
+	<delete file="MANIFEST.MF" />
+	<manifest file="MANIFEST.MF">
+		<attribute name="Built-By" value="${user.name}" />
+		<attribute name="Built-Date" value="${TODAY}" />
+		<attribute name="Main-Class" value="sorter.MyDicomSorter_" />
+		<attribute name="Implementation-Version" value="b${build.number}" />
+	</manifest>
+	<copy file="./MANIFEST.MF" todir="${data}" />
+
 	<property name="jarfile.name" value="${project.name}-${project.version}.jar" />
 	<property name="jarfile.path" location="${dist.dir}/${jarfile.name}" />
 	<target name="jar" depends="compile">
