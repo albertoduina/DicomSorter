@@ -82,7 +82,7 @@
 		<attribute name="Built-By" value="${user.name}" />
 		<attribute name="Built-Date" value="${TODAY}" />
 		<attribute name="Main-Class" value="sorter.MyDicomSorter_" />
-		<attribute name="Implementation-Version" value="b${build.number}" />
+		<attribute name="Implementation-Version" value="${build.number}" />
 	</manifest>
 	<copy file="./MANIFEST.MF" todir="${data}" />
 

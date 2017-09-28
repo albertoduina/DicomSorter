@@ -15,7 +15,7 @@ import ij.io.Opener;
 import utils.ArrayUtils;
 import utils.MyLog;
 
-public class sorterUtils2 {
+public class sorterUtils3 {
 
 	private final static String DICOM_PATIENT_NAME = "0010,0010";
 
@@ -45,9 +45,9 @@ public class sorterUtils2 {
 	private static final int EOF = '\uffff';
 
 	public static boolean mainMethod(String filePath) {
-		long totale = sorterUtils2.countFiles(filePath);
+		long totale = sorterUtils3.countFiles(filePath);
 
-		ArrayList<String> lista = sorterUtils2.listFiles(filePath);
+		ArrayList<String> lista = sorterUtils3.listFiles(filePath);
 		Opener o1 = new Opener();
 
 		// MyLog.logArrayListVertical(lista);
@@ -83,14 +83,14 @@ public class sorterUtils2 {
 				// Create a directory; all ancestor directories must exist
 
 				String directoryPatientName = filePath + patName;
-				boolean success1 = sorterUtils2
+				boolean success1 = sorterUtils3
 						.createDirectory(directoryPatientName);
 				if (!success1)
 					IJ.error("error in createDirectory");
 				String studyName = "Study_" + studyID + "_" + studyDate;
 				String directoryStudyName = filePath + patName + "\\"
 						+ studyName;
-				boolean success2 = sorterUtils2
+				boolean success2 = sorterUtils3
 						.createDirectory(directoryStudyName);
 				if (!success2)
 					IJ.error("error in createDirectory");
@@ -124,7 +124,7 @@ public class sorterUtils2 {
 				// IJ.log("directoryStudyName= " + directoryStudyName);
 				// IJ.log("seriesName= " + seriesName);
 				// IJ.log("directorySeriesName= " + directorySeriesName);
-				boolean success3 = sorterUtils2
+				boolean success3 = sorterUtils3
 						.createDirectory(directorySeriesName);
 				if (!success3) {
 					IJ.error("create dir problems " + directorySeriesName);
@@ -185,7 +185,7 @@ public class sorterUtils2 {
 					exist2 = newfile2.exists();
 					while (exist2) {
 						loop++;
-						newName = sorterUtils2.renameFileProgressive(oldName,
+						newName = sorterUtils3.renameFileProgressive(oldName,
 								loop);
 						newfile2 = new File(destDir, newName);
 						exist2 = newfile2.exists();
@@ -222,8 +222,8 @@ public class sorterUtils2 {
 		String[] list2 = new File(filePath).list();
 		for (int i1 = 0; i1 < list2.length; i1++) {
 			File f1 = new File(filePath + "\\" + list2[i1]);
-			if (sorterUtils2.countFiles(f1.getPath()) == 0) {
-				boolean delete2 = sorterUtils2.deleteDirectoryEmpty(f1);
+			if (sorterUtils3.countFiles(f1.getPath()) == 0) {
+				boolean delete2 = sorterUtils3.deleteDirectoryEmpty(f1);
 				if (!delete2) {
 					// vuol dire che non riesco o non devo cancellare. BASTA COSI'
 					// return false;
@@ -554,8 +554,8 @@ public class sorterUtils2 {
 	 */
 	public static boolean mainDESorterMethod(String sourceDir,
 			String destinationDir) {
-		long totale = sorterUtils2.countFiles(sourceDir);
-		ArrayList<String> lista = sorterUtils2.listFiles(sourceDir);
+		long totale = sorterUtils3.countFiles(sourceDir);
+		ArrayList<String> lista = sorterUtils3.listFiles(sourceDir);
 		String[] sourcePathVector = ArrayUtils.arrayListToArrayString(lista);
 		boolean ok = true;
 		for (int i1 = 0; i1 < sourcePathVector.length; i1++) {

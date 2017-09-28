@@ -1,18 +1,18 @@
 package sorter;
 
-import sorter.sorterUtils;
-import sorter.ExceptionTesting;
-import utils.MyLog;
-import ij.ImagePlus;
-import ij.io.Opener;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.*;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import ij.ImagePlus;
+import ij.io.Opener;
+import utils.MyLog;
 
 public class Sorter_Test {
 
@@ -78,8 +78,7 @@ public class Sorter_Test {
 		assertNotNull(imp);
 
 		String DICOM_PATIENT_NAME = "0010,0010";
-		String parameterValue = sorterUtils.readDicomParameter(imp,
-				DICOM_PATIENT_NAME);
+		String parameterValue = sorterUtils.readDicomParameter(imp, DICOM_PATIENT_NAME);
 		assertEquals("cdqava071206", parameterValue);
 	}
 
@@ -90,8 +89,7 @@ public class Sorter_Test {
 	public void testReadDicomParameterImpNull() {
 		ImagePlus imp = null;
 		String DICOM_PATIENT_NAME = "0010,0010";
-		String parameterValue = sorterUtils.readDicomParameter(imp,
-				DICOM_PATIENT_NAME);
+		String parameterValue = sorterUtils.readDicomParameter(imp, DICOM_PATIENT_NAME);
 		assertEquals(null, parameterValue);
 	}
 
@@ -116,8 +114,7 @@ public class Sorter_Test {
 		ImagePlus imp = o1.openImage(path);
 		assert (imp != null);
 		String DICOM_PATIENT_NAME = "0010,0010";
-		String parameterValue = sorterUtils.readDicomParameter(imp,
-				DICOM_PATIENT_NAME);
+		String parameterValue = sorterUtils.readDicomParameter(imp, DICOM_PATIENT_NAME);
 		assertEquals(null, parameterValue);
 	}
 
@@ -224,15 +221,15 @@ public class Sorter_Test {
 			success = true;
 		}
 		assertTrue(success);
-		MyLog.waitHere("success= "+success);
+		MyLog.waitHere("success= " + success);
 
 		boolean success1 = sorterUtils.createDirectory(nameDir);
 		assertTrue(success1);
 		File src = new File("./Dati/Work/Uno/Due/iw2ayv.aaa");
-		File dst = new File( "./Dati/Work/Moved");
+		File dst = new File("./Dati/Work/Moved");
 		boolean success2 = sorterUtils.copyFile(src, dst);
 		assertFalse(success2);
-		MyLog.waitHere("success2= "+success2);
+		MyLog.waitHere("success2= " + success2);
 
 		boolean success3 = false;
 		if (dir.exists()) {
@@ -241,7 +238,7 @@ public class Sorter_Test {
 			success3 = true;
 		}
 		assertTrue(success3);
-		MyLog.waitHere("success3= "+success3);
+		MyLog.waitHere("success3= " + success3);
 	}
 
 	@Test()
@@ -283,7 +280,6 @@ public class Sorter_Test {
 
 	}
 
-
 	/**
 	 * ok
 	 */
@@ -292,7 +288,7 @@ public class Sorter_Test {
 		String name = "./Dati/Work/Uno/Due/Tre/Quattro/Cinque";
 		boolean result = sorterUtils.createDirectory(name);
 		assertTrue(result);
-		// testo che mi dia true anche se esiste già
+		// testo che mi dia true anche se esiste giï¿½
 		result = sorterUtils.createDirectory(name);
 		assertTrue(result);
 		MyLog.waitHere();
@@ -306,9 +302,7 @@ public class Sorter_Test {
 	@Test()
 	public void testMainMethod() {
 		// creiamo la struttura di directory su cui effettuare il test
-		boolean success = (new File(
-				"c:/Dati/Test3/uno/due/tre/quatto/cinque/sei/sette/otto"))
-				.mkdirs();
+		boolean success = (new File("c:/Dati/Test3/uno/due/tre/quatto/cinque/sei/sette/otto")).mkdirs();
 
 		// System.out.printf("eseguo 2222\n");
 		// nella struttura inserisco un file fasullo
@@ -328,6 +322,18 @@ public class Sorter_Test {
 		String filePath = "c:/Dati/Test3/";
 		boolean ok = sorterUtils.mainMethod(filePath);
 		assertTrue(ok);
+	}
+
+	/**
+	 * ok
+	 */
+	@Test()
+	public void testExtractFileName2() {
+		// Create a directory; all non-existent ancestor directories are
+		// automatically created
+		String name = "C:\\Dati\\____________________________________________provaDicomSorter\\cdqaera1rad190716\\Study_1_20160719\\Series_1_localizerFISICA_SANITARIA^qcpa_matrix";
+		String result1 = sorterUtils.extractFileName2(name);
+		MyLog.waitHere("result1= " + result1);
 	}
 
 }

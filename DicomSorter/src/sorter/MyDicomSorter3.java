@@ -4,7 +4,7 @@ import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.plugin.PlugIn;
 
-public class MyDicomSorter_ implements PlugIn {
+public class MyDicomSorter3 implements PlugIn {
 	public void run(String args) {
 		
 		DirectoryChooser od2 = new DirectoryChooser(
@@ -13,12 +13,12 @@ public class MyDicomSorter_ implements PlugIn {
 		if (filePath == null)
 			return;
 
-		boolean ok = sorterUtils.mainMethod(filePath);
+		boolean ok = sorterUtils2.mainMethod(filePath);
 
 		if (ok) {
-			IJ.showMessage("FINE LAVORO");
+			IJ.showMessage("Fine");
 		} else {
-			IJ.showMessage("FINE LAVORO con possibili errori ....");
+			IJ.showMessage("Fine, con errori");
 		}
 	}
 
