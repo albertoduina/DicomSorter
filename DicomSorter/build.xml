@@ -89,7 +89,7 @@
 	<property name="jarfile.name" value="${project.name}-${project.version}.jar" />
 	<property name="jarfile.path" location="${dist.dir}/${jarfile.name}" />
 	<target name="jar" depends="compile">
-		<jar jarfile="${output}/MyDicomSorter_.jar" basedir="${output}" />
+		<jar jarfile="${output}/MyDicomSorter_${build.number}.jar" basedir="${output}" />
 	</target>
 	<target name="distribution" description="Jar distribution">
 		<copy todir="${dist}">

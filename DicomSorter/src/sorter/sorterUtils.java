@@ -6,8 +6,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -48,20 +52,21 @@ public class sorterUtils {
 		long totale = sorterUtils.countFiles(filePath);
 
 		ArrayList<String> lista = sorterUtils.listFiles(filePath);
-		Opener o1 = new Opener();
+		Opener opener1 = new Opener();
 
 		// MyLog.logArrayListVertical(lista);
 		// MyLog.waitHere();
 
-		for (int i1 = 0; i1 < lista.size(); i1++) {
+		label1: for (int i1 = 0; i1 < lista.size(); i1++) {
 			IJ.showStatus("move file  " + i1 + "/" + totale);
 			IJ.redirectErrorMessages(true);
-			ImagePlus imp1 = o1.openImage(lista.get(i1));
-			IJ.redirectErrorMessages(false);
-			if (imp1 == null) {
-				// i file non leggibili da ImageJ verranno lasciati al loro
-				// posto
-			} else {
+			int type = (new Opener()).getFileType(lista.get(i1));
+			ImagePlus imp1 = null;
+			if (type == Opener.DICOM) {
+				imp1 = opener1.openImage(lista.get(i1));
+				if (imp1 == null)
+					break label1;
+				IJ.redirectErrorMessages(false);
 				String patName = readDicomParameter(imp1, DICOM_PATIENT_NAME);
 				String seqName = readDicomParameter(imp1, DICOM_SEQUENCE_NAME);
 				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
@@ -74,7 +79,21 @@ public class sorterUtils {
 				String coil = readDicomParameter(imp1, DICOM_COIL);
 				String protocolName = readDicomParameter(imp1, DICOM_PROTOCOL_NAME);
 				String fileName = imp1.getTitle();
-				// IJ.log("eseguo il passo numero " + i1);
+				if (patName == null)
+					continue;
+
+				// IJ.log("patname= " + patName);
+				// IJ.log("fileName= " + fileName);
+				// IJ.log("---------");
+				// IJ.log("seqName= " + seqName);
+				// IJ.log("studyID= " + studyID);
+				// IJ.log("studyDate= " + studyDate);
+				// IJ.log("seriesNum= " + seriesNum);
+				// IJ.log("seriesDescription= " + seriesDescription);
+				// IJ.log("acqNum= " + acqNum);
+				// IJ.log("acqTime= " + acqTime);
+				// IJ.log("coil= " + coil);
+				// IJ.log("protocolName= " + protocolName);
 				// Create a directory; all ancestor directories must exist
 				patName = patName.replace(" ", "_");
 
@@ -113,7 +132,8 @@ public class sorterUtils {
 				}
 				String seriesName = "Series_" + aux14 + "_" + aux13;
 				String aux15 = directoryStudyName + File.separator + seriesName;
-				String directorySeriesName = aux15.replaceAll(" ", "_");
+				// String directorySeriesName = aux15.replaceAll(" ", "_");
+				String directorySeriesName = aux15;
 				// IJ.log("directorySeriesName= " + directorySeriesName);
 				// MyLog.waitHere();
 				// IJ.log("directoryPatientName= " + directoryPatientName);
@@ -127,11 +147,13 @@ public class sorterUtils {
 				} else {
 
 				}
+
 				File moveCandidate = new File(lista.get(i1));
 				// Destination directory
 				File destDir = new File(directorySeriesName);
 				// IJ.log("directorySeriesName= " + directorySeriesName);
 				File sourceDir = new File(moveCandidate.getParent());
+
 				String oldName2 = moveCandidate.getName();
 				String newSeriesName = seriesNum + "_" + oldName2;
 				String aux = coil;
@@ -151,16 +173,16 @@ public class sorterUtils {
 					}
 				}
 				String newName = "";
-				if (sourceDir.getName().equals(destDir.getName())) {
+				if (sourceDir.equals(destDir)) {
 				} else {
 					boolean exist2 = false;
 					// verifico inoltre se il nome da assegnare al file da
-					// spostare esista gi� nella dierctory destinazione, in
+					// spostare esista gia' nella dierctory destinazione, in
 					// questo caso aggiungo, tramite renameFile un numero
 					// crescente.
 					// Rieffettuo il controllo, eventualmente continuando ad
 					// aumentare il numero da aggiungere (loop), finch� il nuovo
-					// nome non esista pi� nella directory destinazione.
+					// nome non esista piu' nella directory destinazione.
 					int loop = 0;
 
 					// verifico che il nuovo file and path non abbiano caratteri
@@ -586,7 +608,6 @@ public class sorterUtils {
 		return tmp1;
 	}
 
-
 	/**
 	 * Effettua il move di un file
 	 * 
@@ -724,13 +745,11 @@ public class sorterUtils {
 	 * @return true se ok
 	 */
 	public static boolean mainDESorterMethod(String sourceDir, String destinationDir) {
-		
-		
+
 		long totale = sorterUtils.countFiles(sourceDir);
 
-
 		ArrayList<String> lista = sorterUtils.listFiles(sourceDir);
-		
+
 		String[] sourcePathVector = sorterUtils.arrayListToArrayString(lista);
 
 		boolean ok = true;
@@ -778,7 +797,6 @@ public class sorterUtils {
 		}
 		return list3;
 	}
-
 
 	public static String extractFileName2(String path) {
 
@@ -853,7 +871,7 @@ public class sorterUtils {
 		}
 		return ok;
 	}
-	
+
 	public static String[] arrayListToArrayString(List<String> inArrayList) {
 		Object[] objArr = inArrayList.toArray();
 		String[] outStrArr = new String[objArr.length];
@@ -880,6 +898,5 @@ public class sorterUtils {
 			return true;
 		}
 	}
-
 
 } // sorterUtils

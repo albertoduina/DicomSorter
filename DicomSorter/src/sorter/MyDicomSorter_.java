@@ -12,6 +12,7 @@ public class MyDicomSorter_ implements PlugIn {
 		String filePath = od2.getDirectory();
 		if (filePath == null)
 			return;
+		
 
 		boolean ok = sorterUtils.mainMethod(filePath);
 
