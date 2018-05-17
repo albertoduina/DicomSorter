@@ -4,7 +4,7 @@ import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.plugin.PlugIn;
 
-public class MyDicomSorter3 implements PlugIn {
+public class MyDicomSorter_2 implements PlugIn {
 	public void run(String args) {
 		
 		DirectoryChooser od2 = new DirectoryChooser(

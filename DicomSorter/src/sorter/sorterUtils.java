@@ -66,7 +66,7 @@ public class sorterUtils {
 				imp1 = opener1.openImage(lista.get(i1));
 				if (imp1 == null)
 					break label1;
-				IJ.redirectErrorMessages(false);
+				IJ.redirectErrorMessages(true);
 				String patName = readDicomParameter(imp1, DICOM_PATIENT_NAME);
 				String seqName = readDicomParameter(imp1, DICOM_SEQUENCE_NAME);
 				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
