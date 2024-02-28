@@ -41,7 +41,7 @@
 
 	<!-- COMPILE java classes -->
 	<target name="compile" description="Compile everything.">
-		<javac srcdir="${source}" destdir="${output}" optimize="on" target="1.6" source="1.6" encoding="iso8859-1" debug="on" classpath="${pathImageJ};${pathIW2AYV}" />
+		<javac srcdir="${source}" destdir="${output}" optimize="on" target="1.7" source="1.7" encoding="iso8859-1" debug="on" classpath="${pathImageJ};${pathIW2AYV}" />
 	</target>
 
 	<!-- INITIALIZE delete and recreate empy directory -->

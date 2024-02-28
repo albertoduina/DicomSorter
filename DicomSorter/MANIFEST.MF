@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.10.1
-Created-By: 1.8.0_151-b12 (Oracle Corporation)
+Ant-Version: Apache Ant 1.10.14
+Created-By: 16.0.1+9-24 (Oracle Corporation)
 Built-By: Alberto
 Built-Date: ${TODAY}
 Main-Class: sorter.MyDicomSorter_
