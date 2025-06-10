@@ -2,7 +2,56 @@
 <project name="DicomSorter" default="main">
 
 	<!-- Definizioni property -->
-	<property environment="env" />
+	
+    <!-- Percorso base in cui installare il plugin, da aggiornare in caso di spostamenti-->
+    <property name="imagej.plugins.base" location="C:/Programmi2/ImageJ/plugins" />
+	<property name="FIJI.plugins.base" location="C:/Programmi2/FIJI/fiji-win64/Fiji.app/plugins" />
+
+	<property name="imagej.plugins.dir" location="${imagej.plugins.base}/DicomSorter" />
+	<property name="FIJI.plugins.dir" location="${FIJI.plugins.base}//DicomSorter" />
+	
+	<!-- ====== Percorsi principali del progetto, tutti localizzati automaticamente con basedir ===== -->
+	<property name="source"         location="${basedir}/src/sorter" />
+	<property name="output"         location="${basedir}/build" />
+	<property name="dist"  			location="${basedir}/dist" />
+	<property name="data" 			location="${basedir}/data" />
+	<!-- property name="test"           location="${basedir}/test/contMensili" / -->
+	<!-- ====== Path ij.jar VERIFICARE ed AGGIORNARE, solo se necessario === -->	
+	<property name="repo" 	location="${basedir}/../.." />
+	<property name="pathImageJ" 	location="C:\Users\Alberto\Repository\Workspace\workspaceBase\imagej\ij.jar" />
+
+	<!-- ===== stampa dei valori property ===== -->	
+	<echo message="project name= ${ant.project.name}" />
+	<echo message="basedir= ${basedir}" />
+	<echo message="ant.file= ${ant.file}" />
+	<!--C:\Users\alberto\Repository\git\DicomSorter\DicomSorter\src\sorter -->
+	<echo message="source= ${source}" />
+	<echo message="output= ${output}" />
+	<echo message="dist= ${dist}" />
+	<echo message="data= ${data}" />
+	<echo message="test= ${test}" />
+	<echo message="repo= ${repo}" />
+	<echo message="pathImageJ= ${pathImageJ}" />
+	<!-- "pathImageJ= C:\Users\Alberto\Repository\Workspace\workspaceBase\imagej\ij.jar" /-->
+	<!-- =============================================" -->
+
+	<!-- in questo modo posso utilizzare le wildcards per il nome del file-->
+	<path id="pathIW2AYVxx">
+		<fileset dir="C:\Users\alberto\Repository\git\Iw2ayv\Iw2ayv\dist\">
+			<include name="iw2ayv*.jar" />
+		</fileset>
+	</path>
+	<property name="pathIW2AYV" refid="pathIW2AYVxx" />
+	<echo message="pathIW2AYV= ${pathIW2AYV}" />
+	
+	<!-- Marca temporale per versionamento -->
+	<tstamp>
+		<format property="time.stamp" pattern="yyyyMMMdd_HHmm"/>
+	</tstamp>
+	<echo message="tstamp= ${time.stamp}" />		
+
+	<!-- Definizioni property -->
+	<!--property environment="env" />
 	<property name="disk" value="${env.SystemDrive}" />
 
 	<echo message="basedir= ${basedir}" />
@@ -14,10 +63,10 @@
 
 	<property name="pathImageJ" location="${work}/imagej/ij.jar" />
 	<echo message="pathImageJ= ${pathImageJ}" />
-	<property name="dist" location="dist" />
+	<property name="dist" location="dist" /-->
 
 	<!-- in questo modo posso utilizzare le wildcards per il nome del file-->
-	<path id="pathIW2AYVxx">
+	<!--path id="pathIW2AYVxx">
 		<fileset dir="${work}\iw2ayv\iw2ayv\dist\">
 			<include name="iw2ayv*.jar" />
 		</fileset>
@@ -25,23 +74,36 @@
 	<property name="pathIW2AYV" refid="pathIW2AYVxx" />
 	<echo message="pathIW2AYV= ${pathIW2AYV}" />
 
-	<!--property name="pathIW2AYV" location="${work}\iw2ayv\iw2ayv\dist\iw2ayv.jar" />
+	<property name="pathIW2AYV" location="${work}\iw2ayv\iw2ayv\dist\iw2ayv.jar" />
 	<echo message="pathIW2AYV= ${pathIW2AYV}" /-->
 
-	<property name="output" location="build" />
+	<!--property name="output" location="build" />
 	<property name="source" location="src/sorter" />
-	<property name="eclipse-home" value="${basedir}\..\.." />
+	<property name="eclipse-home" value="${basedir}\..\.." /-->
 
 
 
 
 	<!-- ##############			MAIN ROUTINE 		############## -->
-	<target name="main" depends="init, compile, copy1, jar, distribution, cond_INS, cond_OLD, cond_WIN7" />
+	<target name="main" depends="init, 
+								compile, 
+								copy1, 
+								jar, 
+								distribution, 
+								cond_WIN7" />
 	<!--target name="main" depends="init, compile, copy1, jar,  moveJar, production" / -->
 
 	<!-- COMPILE java classes -->
 	<target name="compile" description="Compile everything.">
-		<javac srcdir="${source}" destdir="${output}" optimize="on" target="1.7" source="1.7" encoding="iso8859-1" debug="on" classpath="${pathImageJ};${pathIW2AYV}" />
+		<javac 	srcdir= "${source}" 
+				destdir="${output}" 
+				optimize="on" 
+				target="1.8" 
+				source="1.8" 
+				encoding="iso8859-1" 
+				debug="on" 
+				classpath="${pathImageJ};
+			${pathIW2AYV}" />
 	</target>
 
 	<!-- INITIALIZE delete and recreate empy directory -->
@@ -55,13 +117,6 @@
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
 
-		<property name="productDirINSIDE" location="${work}\imagej\Plugins" />
-		<available file="${productDirINSIDE}" type="dir" property="ins" />
-		<echo message="ins=${ins}" />
-
-		<property name="productDirOLD" location="${disk}/Programmi\ImageJ\Plugins" />
-		<available file="${productDirOLD}" type="dir" property="old" />
-		<echo message="oldS=${old}" />
 
 		<property name="productDirWIN7" location="${disk}/Programmi2\ImageJ\plugins" />
 		<available file="${productDirWIN7}" type="dir" property="win7" />
@@ -96,35 +151,16 @@
 			<fileset dir="${output}" includes="*.jar" />
 		</copy>
 	</target>
-	<target name="cond_INS" depends="init" if="ins">
-		<echo message="Eseguo cond_INS" />
-		<delete dir="${productDirINSIDE}/DicomSorter" />
-		<mkdir dir="${productDirINSIDE}/DicomSorter" />
-		<copy todir="${productDirINSIDE}/DicomSorter">
-			<!-- fileset dir="${dist}" includes="*.jar" /-->
-			<fileset dir="${output}" includes="*.jar" />
-		</copy>
-	</target>
 
-	<target name="cond_OLD" depends="init" if="old">
-		<echo message="Eseguo cond_OLD" />
-		<delete dir="${productDirOLD}/DicomSorter" />
-		<mkdir dir="${productDirOLD}/DicomSorter" />
-		<copy todir="${productDirOLD}/DicomSorter">
-			<!-- fileset dir="${dist}" includes="*.jar" /-->
-			<fileset dir="${output}" includes="*.jar" />
-		</copy>
-	</target>
-	<target name="cond_WIN7" depends="init" if="win7">
+
+	<target name="cond_WIN7" >
 		<echo message="Eseguo cond_WIN7" />
-		<delete dir="${productDirWIN7}/DicomSorter" />
-		<mkdir dir="${productDirWIN7}/DicomSorter" />
-		<copy todir="${productDirWIN7}/DicomSorter">
-			<!-- fileset dir="${dist}" includes="*.jar" /-->
-			<fileset dir="${output}" includes="*.jar" />
+		<delete dir="${imagej.plugins.dir}" />
+		<mkdir dir="${imagej.plugins.dir}" />
+		<copy todir="${imagej.plugins.dir}">
+			<fileset dir="${dist}" includes="*.jar" />
 		</copy>
 	</target>
-
 
 
 </project>
