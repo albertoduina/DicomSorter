@@ -6,12 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -49,7 +45,13 @@ public class sorterUtils {
 	private static final int EOF = '\uffff';
 
 	public static int num1 = 0;
+	public static int globalRenumber = 0;
 
+	/**
+	 * 
+	 * @param filePath
+	 * @return
+	 */
 	public static boolean mainMethod(String filePath) {
 		long totale = sorterUtils.countFiles(filePath);
 
@@ -215,7 +217,7 @@ public class sorterUtils {
 					do {
 						moved3 = moveCandidate.renameTo(newfile2);
 						count3++;
-						MyLog.waitHere("tentativo "+count3+" di muovere il file "+newfile2);
+						// MyLog.waitHere("tentativo "+count3+" di muovere il file "+newfile2);
 
 						if (!moved3) {
 							IJ.wait(10);
@@ -631,22 +633,32 @@ public class sorterUtils {
 	 */
 	public static boolean moveFile(String pathSorgente, String dirDestinazione) {
 		boolean success = false;
+//		IJ.log("globalRenumber= " + globalRenumber);
 		// IJ.log("pathSorgente= " + pathSorgente);
 		// InputOutput io1 = new InputOutput();
 		String nomeFile = extractFileName2(pathSorgente);
+		String renumberFile = "";
+		boolean dico1 = isDicomImage(pathSorgente);
 		File fileSorgente = new File(pathSorgente);
 		File fileDirDestinazione = new File(dirDestinazione);
 		if (!fileDirDestinazione.exists()) {
 			fileDirDestinazione.mkdir();
 		}
 		if (fileDirDestinazione.exists()) {
-			// IJ.log("sorgente= " + nomeFile + " destinazione= " +
-			// dirDestinazione);
-			success = fileSorgente.renameTo(new File(dirDestinazione, nomeFile));
+			globalRenumber++;
+			if (dico1) {
+				renumberFile = String.format("%04d", globalRenumber);
+//				IJ.log("sorgente= " + nomeFile + " destinazione= " + renumberFile);
+				success = fileSorgente.renameTo(new File(dirDestinazione, renumberFile));
+			} else {
+				renumberFile = String.format("%04d", globalRenumber)+nomeFile;
+//				IJ.log("sorgente>>>= " + nomeFile + " destinazione>>> =" + renumberFile);
+				success = fileSorgente.renameTo(new File(dirDestinazione, renumberFile));
+			}
 		}
 		if (!success) {
-			// MyLog.waitHere("File " + nomeFile + " was not successfully moved
-			// to " + dirDestinazione);
+			// TOOLS
+			IJ.log("File " + nomeFile + " was not successfully moved to " + renumberFile);
 		}
 		return success;
 	}
@@ -775,15 +787,17 @@ public class sorterUtils {
 	/***
 	 * Effettua il de-sorter
 	 * 
-	 * @param sourceDir      direcctory sortata
+	 * @param sourceDir      directory sortata
 	 * @param destinationDir directory destinazione in cui spostare tutti i files
 	 * @return true se ok
 	 */
 	public static boolean mainDESorterMethod(String sourceDir, String destinationDir) {
 
 		long totale = sorterUtils.countFiles(sourceDir);
-
 		ArrayList<String> lista = sorterUtils.listFiles(sourceDir);
+
+//		MyLog.logArrayList(lista);
+//		MyLog.waitHere();
 
 		String[] sourcePathVector = sorterUtils.arrayListToArrayString(lista);
 
@@ -791,11 +805,13 @@ public class sorterUtils {
 		num1 = 0;
 		for (int i1 = 0; i1 < sourcePathVector.length; i1++) {
 			boolean ok1 = false;
+			IJ.redirectErrorMessages();
+
 			String sourcePath = sourcePathVector[i1];
 			String destinationPath = destinationDir;
 			ok1 = moveFile(sourcePath, destinationPath);
-			// MyLog.waitHere("source= "+sourcePath+ "\ndestination=
-			// "+destinationPath);
+			// MyLog.waitHere("source= " + sourcePath + "\ndestination= " +
+			// destinationPath);
 
 			if (ok1 == false) {
 				ok = false;
@@ -803,7 +819,7 @@ public class sorterUtils {
 				num1++;
 			}
 			// else
-			IJ.showStatus("move file " + num1 + File.separator + totale);
+			IJ.showStatus("desort file " + num1 + File.separator + totale);
 
 		}
 
@@ -837,6 +853,12 @@ public class sorterUtils {
 		return list3;
 	}
 
+	/***
+	 * Estrae il filename dal path
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public static String extractFileName2(String path) {
 
 		int pos = path.lastIndexOf(File.separator);
@@ -844,6 +866,13 @@ public class sorterUtils {
 		return fileName;
 	}
 
+	/**
+	 * Copia di una cartella e del suo contenuto
+	 * 
+	 * @param srcFolder
+	 * @param destFolder
+	 * @return
+	 */
 	public static boolean copyDirectoryWithFiles(String srcFolder, String destFolder) {
 
 		boolean ok = false;
@@ -864,6 +893,14 @@ public class sorterUtils {
 		return ok;
 	}
 
+	/***
+	 * Copia ricorsiva di file da una cartella all'altra
+	 * 
+	 * @param src
+	 * @param dest
+	 * @return
+	 * @throws IOException
+	 */
 	public static boolean copyFolder(File src, File dest) throws IOException {
 
 		boolean ok = true;
@@ -911,6 +948,13 @@ public class sorterUtils {
 		return ok;
 	}
 
+	/**
+	 * Conversion from arrayList<String> to String[]
+	 * 
+	 * @param inArrayList arrayList input
+	 * @return String[] output
+	 */
+
 	public static String[] arrayListToArrayString(List<String> inArrayList) {
 		Object[] objArr = inArrayList.toArray();
 		String[] outStrArr = new String[objArr.length];
@@ -920,6 +964,12 @@ public class sorterUtils {
 		return outStrArr;
 	}
 
+	/***
+	 * Verifica se si tratta di una immagine DICOM, riconosciuta da ImageJ
+	 * 
+	 * @param fileName1
+	 * @return
+	 */
 	public static boolean isDicomImage(String fileName1) {
 		// IJ.redirectErrorMessages();
 		int type = (new Opener()).getFileType(fileName1);
@@ -938,4 +988,4 @@ public class sorterUtils {
 		}
 	}
 
-} // sorterUtils
+}

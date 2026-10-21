@@ -6,12 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -25,43 +21,19 @@ import utils.ReadDicom;
 public class sorterUtils6 {
 
 	private final static String DICOM_PATIENT_NAME = "0010,0010";
-
-	private final static String DICOM_STUDY_DATE = "0008,0020";
-
-	private final static String DICOM_SEQUENCE_NAME = "0018,0024";
-
-	private final static String DICOM_ACQUISITION_TIME = "0008,0032";
-
 	private final static String DICOM_IMAGE_TIME = "0008,0033";
-
 	private final static String DICOM_PROTOCOL_NAME = "0008,1030";
-
 	private final static String DICOM_SERIES_DESCRIPTION = "0008,103E";
-
-	private final static String DICOM_STUDY_ID = "0020,0010";
-
 	private final static String DICOM_SERIES_NUMBER = "0020,0011";
-
-	private final static String DICOM_ACQUISITION_NUMBER = "0020,0012";
-
 	private final static String DICOM_COIL1 = "0051,100F";
-
 	private final static String DICOM_COIL2 = "0021,114F";
-
-	private final static String DICOM_IMAGE_NUMBER = "0020,0013";
-
 	private final static String DICOM_IMAGE_POSITION = "0020,0032";
-
-	private static final int EOF = '\uffff';
 
 	public static boolean mainMethod(String filePath) {
 		long totale = sorterUtils6.countFiles(filePath);
 
 		ArrayList<String> lista = sorterUtils6.listFiles(filePath);
 		Opener opener1 = new Opener();
-
-		// MyLog.logArrayListVertical(lista);
-		// MyLog.waitHere();
 
 		//===============================================
 		// CREAZIONE STRUTTURA DIRECTORY
@@ -79,17 +51,10 @@ public class sorterUtils6 {
 					break label1;
 				IJ.redirectErrorMessages(true);
 				String patName = readDicomParameter(imp1, DICOM_PATIENT_NAME);
-				String seqName = readDicomParameter(imp1, DICOM_SEQUENCE_NAME);
-				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
-				String studyDate = readDicomParameter(imp1, DICOM_STUDY_DATE);
 				String seriesNum = readDicomParameter(imp1, DICOM_SERIES_NUMBER);
 				String seriesDescription = readDicomParameter(imp1, DICOM_SERIES_DESCRIPTION);
-				String imaNum = readDicomParameter(imp1, DICOM_IMAGE_NUMBER);
 				String imaPos2 = readDicomParameter(imp1, DICOM_IMAGE_POSITION);
 				String imaPos = imaPos2.replace("\\", "_");
-				// MyLog.waitHere("imaPos= " + imaPos);
-				String acqNum = readDicomParameter(imp1, DICOM_ACQUISITION_NUMBER);
-				String acqTime = readDicomParameter(imp1, DICOM_ACQUISITION_TIME);
 				String imaTime = readDicomParameter(imp1, DICOM_IMAGE_TIME);
 				String coil1 = readDicomParameter(imp1, DICOM_COIL1);
 				String coil2 = readDicomParameter(imp1, DICOM_COIL2);
@@ -98,25 +63,12 @@ public class sorterUtils6 {
 					coil = coil1;
 				if (coil2.equals("MISS") == false)
 					coil = coil2;
-				IJ.log("seqName= " + seqName + " coil1= " + coil1 + " coil2= " + coil2 + " coil= " + coil);
+				// IJ.log("seqName= " + seqName + " coil1= " + coil1 + " coil2= " + coil2 + " coil= " + coil);
 
 				String protocolName = readDicomParameter(imp1, DICOM_PROTOCOL_NAME);
-				String fileName = imp1.getTitle();
 				if (patName == null)
 					continue;
 
-				// IJ.log("patname= " + patName);
-				// IJ.log("fileName= " + fileName);
-				// IJ.log("---------");
-				// IJ.log("seqName= " + seqName);
-				// IJ.log("studyID= " + studyID);
-				// IJ.log("studyDate= " + studyDate);
-				// IJ.log("seriesNum= " + seriesNum);
-				// IJ.log("seriesDescription= " + seriesDescription);
-				// IJ.log("acqNum= " + acqNum);
-				// IJ.log("acqTime= " + acqTime);
-				// IJ.log("coil= " + coil);
-				// IJ.log("protocolName= " + protocolName);
 				// Create a directory; all ancestor directories must exist
 				patName = patName.replace(" ", "_");
 
@@ -127,20 +79,8 @@ public class sorterUtils6 {
 				if (!success1)
 					IJ.error("error in createDirectory");
 
-//				String studyName = "Study_" + studyID + "_" + studyDate;
-//				String directoryStudyName = filePath + patName + File.separator + studyName;
-//				boolean success2 = sorterUtils5.createDirectory(directoryStudyName);
-
-
-//				MyLog.waitHere("Time= " + imaTime);
-
-//				String[] time12 = imaTime.split(".");
-//				if (time12 == null)
-//					MyLog.waitHere("time12==null");
-//				MyLog.waitHere("time12.length= " + time12.length);
 
 				String time1 = imaTime.substring(0, 6);
-//				MyLog.waitHere("time1= " + time1);
 
 				String directoryImaTime = filePath + patName + File.separator + time1+ "_"+seriesDescription;
 
@@ -201,17 +141,8 @@ public class sorterUtils6 {
 				}
 
 				String seriesName = "Series_" + aux14 + "_" + aux13;
-//				String aux15 = directoryStudyName + File.separator + seriesName + "_" + coilX + "_pos_" + imaPos;
 				String aux15 = directoryImaTime + File.separator + seriesName + "_" + coilX + "_pos_" + imaPos;
-				// String directorySeriesName = aux15.replaceAll(" ", "_");
 				String directorySeriesName = aux15;
-				// IJ.log("directorySeriesName= " + directorySeriesName);
-				// MyLog.waitHere("directorySeriesName= " + directorySeriesName);
-				// IJ.log("directoryPatientName= " + directoryPatientName);
-				// IJ.log("studyName= " + studyName);
-				// IJ.log("directoryStudyName= " + directoryStudyName);
-				// IJ.log("seriesName= " + seriesName);
-				// IJ.log("directorySeriesName= " + directorySeriesName);
 				boolean success3 = sorterUtils6.createDirectory(directorySeriesName);
 				if (!success3) {
 					IJ.error("create dir problems " + directorySeriesName);
@@ -582,8 +513,8 @@ public class sorterUtils6 {
 		try {
 			fis = new FileInputStream(in);
 		} catch (Exception e1) {
-			// System.out.println("copyFile 00001 " + e1);
-			return false;
+			//System.out.println("copyFile 00001 " + e1);
+			// return false;
 		}
 		FileOutputStream fos = null;
 		try {
@@ -597,7 +528,7 @@ public class sorterUtils6 {
 				e.printStackTrace();
 			}
 
-			return false;
+			// return false;
 		}
 		try {
 			byte[] buf = new byte[1024];
@@ -731,7 +662,7 @@ public class sorterUtils6 {
 		String[] foldersPathVector = ArrayUtils.arrayListToArrayString(lista2);
 		for (int i1 = 0; i1 < foldersPathVector.length; i1++) {
 			File deletable = new File(foldersPathVector[i1]);
-			boolean ok4 = deleteDirectoryEmpty(deletable);
+			deleteDirectoryEmpty(deletable);
 		}
 		return ok;
 	}
@@ -777,23 +708,19 @@ public class sorterUtils6 {
 	 */
 	public static boolean mainDESorterMethod(String sourceDir, String destinationDir) {
 
-		long totale = sorterUtils6.countFiles(sourceDir);
-
 		ArrayList<String> lista = sorterUtils6.listFiles(sourceDir);
-
 		String[] sourcePathVector = sorterUtils6.arrayListToArrayString(lista);
-
-		boolean ok = true;
+		boolean ok1 = true;
 		for (int i1 = 0; i1 < sourcePathVector.length; i1++) {
-			boolean ok1 = false;
+			boolean ok2 = false;
 			String sourcePath = sourcePathVector[i1];
 			String destinationPath = destinationDir;
-			ok1 = moveFile(sourcePath, destinationPath);
+			ok2 = moveFile(sourcePath, destinationPath);
 			// MyLog.waitHere("source= "+sourcePath+ "\ndestination=
 			// "+destinationPath);
 
-			if (ok1 == false)
-				ok = false;
+			if (ok2 == false)
+				ok1 = false;
 			// else
 			// IJ.showStatus("move file " + i1 + File.separator + totale);
 		}
@@ -802,9 +729,9 @@ public class sorterUtils6 {
 		String[] foldersPathVector = sorterUtils6.arrayListToArrayString(lista2);
 		for (int i1 = 0; i1 < foldersPathVector.length; i1++) {
 			File deletable = new File(foldersPathVector[i1]);
-			boolean ok4 = deleteDirectoryEmpty(deletable);
+			deleteDirectoryEmpty(deletable);
 		}
-		return ok;
+		return ok1;
 	}
 
 	/***
@@ -928,5 +855,8 @@ public class sorterUtils6 {
 			return true;
 		}
 	}
+	
+	
+	
 
 } // sorterUtils

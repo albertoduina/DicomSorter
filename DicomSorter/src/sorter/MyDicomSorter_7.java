@@ -5,7 +5,14 @@ import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.plugin.PlugIn;
 
+
+/***
+ * 
+ */
 public class MyDicomSorter_7 implements PlugIn {
+	/***
+	 * 
+	 */
 	public void run(String args) {
 
 		DirectoryChooser od2 = new DirectoryChooser("SELEZIONARE LA CARTELLA IMMAGINI");

@@ -1,17 +1,14 @@
 package sorter;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -25,125 +22,87 @@ import utils.ReadDicom;
 public class sorterUtils8 {
 
 	private final static String DICOM_PATIENT_NAME = "0010,0010";
-
-	private final static String DICOM_STUDY_DATE = "0008,0020";
-
-	private final static String DICOM_SEQUENCE_NAME = "0018,0024";
-
-	private final static String DICOM_ACQUISITION_TIME = "0008,0032";
-
-	private final static String DICOM_IMAGE_TIME = "0008,0033";
-
 	private final static String DICOM_PROTOCOL_NAME = "0008,1030";
-
 	private final static String DICOM_SERIES_DESCRIPTION = "0008,103E";
-
-	private final static String DICOM_STUDY_ID = "0020,0010";
-
 	private final static String DICOM_SERIES_NUMBER = "0020,0011";
+	public static final String DICOM_COIL1 = "0051,100F";
+	public static final String DICOM_COIL2 = "0021,114F";
+	public static final String DICOM_COIL3 = "0021,104F";
+	public static final String DICOM_COIL4 = "0065,1003";
 
-	private final static String DICOM_ACQUISITION_NUMBER = "0020,0012";
-
-	private final static String DICOM_COIL1 = "0051,100F";
-
-	private final static String DICOM_COIL2 = "0021,114F";
-
-	private final static String DICOM_IMAGE_NUMBER = "0020,0013";
-
-	private final static String DICOM_IMAGE_POSITION = "0020,0032";
-
-	private static final int EOF = '\uffff';
-
+	/***
+	 * 
+	 * @param filePath
+	 * @return
+	 */
 	public static boolean mainMethod(String filePath) {
 		long totale = sorterUtils8.countFiles(filePath);
-
+		String path1 = "";
 		ArrayList<String> lista = sorterUtils8.listFiles(filePath);
 		Opener opener1 = new Opener();
-
-		// MyLog.logArrayListVertical(lista);
-		// MyLog.waitHere();
-
-		//===============================================
+		// ===============================================
 		// CREAZIONE STRUTTURA DIRECTORY
-		//===============================================
-
-		
-		label1: for (int i1 = 0; i1 < lista.size(); i1++) {
+		// ===============================================
+		for (int i1 = 0; i1 < lista.size(); i1++) {
 			IJ.showStatus("move file  " + i1 + "/" + totale);
 			IJ.redirectErrorMessages(true);
-			int type = (new Opener()).getFileType(lista.get(i1));
+			path1 = lista.get(i1);
+			int type = (new Opener()).getFileType(path1);
 			ImagePlus imp1 = null;
 			if (type == Opener.DICOM) {
-				imp1 = opener1.openImage(lista.get(i1));
-				if (imp1 == null)
-					break label1;
+				imp1 = opener1.openImage(path1);
+				if (imp1 == null) {
+					IJ.log("path1aa= " + path1 + " null");
+					// break label1;
+					continue;
+				}
+				if (imp1.hasImageStack()) {
+					IJ.log("path1bb= " + path1 + " stack");
+					continue;
+				}
 				IJ.redirectErrorMessages(true);
+				// ----------------------------------------------------------------
+				// leggo i dati utilizzabili per il dicomSorter
+				// ----------------------------------------------------------------
 				String patName = readDicomParameter(imp1, DICOM_PATIENT_NAME);
-				String seqName = readDicomParameter(imp1, DICOM_SEQUENCE_NAME);
-				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
-				String studyDate = readDicomParameter(imp1, DICOM_STUDY_DATE);
 				String seriesNum = readDicomParameter(imp1, DICOM_SERIES_NUMBER);
-				String seriesDescription = readDicomParameter(imp1, DICOM_SERIES_DESCRIPTION);
-				String imaNum = readDicomParameter(imp1, DICOM_IMAGE_NUMBER);
-				String imaPos2 = readDicomParameter(imp1, DICOM_IMAGE_POSITION);
-				String imaPos = imaPos2.replace("\\", "_");
-				// MyLog.waitHere("imaPos= " + imaPos);
-				String acqNum = readDicomParameter(imp1, DICOM_ACQUISITION_NUMBER);
-				String acqTime = readDicomParameter(imp1, DICOM_ACQUISITION_TIME);
-				String imaTime = readDicomParameter(imp1, DICOM_IMAGE_TIME);
-				String coil1 = readDicomParameter(imp1, DICOM_COIL1);
-				String coil2 = readDicomParameter(imp1, DICOM_COIL2);
+				String seriesDescription1 = readDicomParameter(imp1, DICOM_SERIES_DESCRIPTION);
+				String seriesDescription = filterChar(seriesDescription1);
+				// ----------------------------------------------------------------
+				// leggo l'eventuale elemento bobina (per le uncombined)
+				// ----------------------------------------------------------------
+				String coil1 = readDicomParameter(imp1, DICOM_COIL1); /// 0051,100F
+				String coil2 = readDicomParameter(imp1, DICOM_COIL2); /// 0021,114F
+				// String coil3 = readDicomParameter(imp1, DICOM_COIL3); /// 0021,104F
+				String coil3 = piedeDiPorco(path1, "21004F10"); /// 0021,104F serve per leggere il dato anche nelle
+																/// immagini passanti per il PACS
+				String coil4 = readDicomParameter(imp1, DICOM_COIL4); //// '0065,1003
+
 				String coil = "MISS";
-				if (coil1.equals("MISS") == false)
+				if (coil1.equals("MISS") == false && coil1.equals("") == false) {
 					coil = coil1;
-				if (coil2.equals("MISS") == false)
+				}
+				if (coil2.equals("MISS") == false && coil2.equals("") == false) {
 					coil = coil2;
-				IJ.log("seqName= " + seqName + " coil1= " + coil1 + " coil2= " + coil2 + " coil= " + coil);
+				}
+				if (coil3.equals("MISS") == false && coil3.equals("") == false) {
+					coil = coil3;
+				}
+				if (coil4.equals("MISS") == false && coil4.equals("") == false) {
+					coil = coil4;
+				}
+				MyLog.waitHere("coil= " + coil);
 
 				String protocolName = readDicomParameter(imp1, DICOM_PROTOCOL_NAME);
-				String fileName = imp1.getTitle();
 				if (patName == null)
 					continue;
-
-				// IJ.log("patname= " + patName);
-				// IJ.log("fileName= " + fileName);
-				// IJ.log("---------");
-				// IJ.log("seqName= " + seqName);
-				// IJ.log("studyID= " + studyID);
-				// IJ.log("studyDate= " + studyDate);
-				// IJ.log("seriesNum= " + seriesNum);
-				// IJ.log("seriesDescription= " + seriesDescription);
-				// IJ.log("acqNum= " + acqNum);
-				// IJ.log("acqTime= " + acqTime);
-				// IJ.log("coil= " + coil);
-				// IJ.log("protocolName= " + protocolName);
 				// Create a directory; all ancestor directories must exist
 				patName = patName.replace(" ", "_");
-
 				String directoryPatientName = filePath + patName;
-//				IJ.log("directoryPatientName= "+directoryPatientName);
 				boolean success1 = sorterUtils8.createDirectory(directoryPatientName);
 				if (!success1)
 					IJ.error("error in createDirectory");
-
-//				String studyName = "Study_" + studyID + "_" + studyDate;
-//				String directoryStudyName = filePath + patName + File.separator + studyName;
-//				boolean success2 = sorterUtils5.createDirectory(directoryStudyName);
-
-
-//				MyLog.waitHere("Time= " + imaTime);
-
-//				String[] time12 = imaTime.split(".");
-//				if (time12 == null)
-//					MyLog.waitHere("time12==null");
-//				MyLog.waitHere("time12.length= " + time12.length);
-
-				String time1 = imaTime.substring(0, 6);
-//				MyLog.waitHere("time1= " + time1);
-
 				String directoryImaTime = filePath + patName + File.separator + seriesDescription;
-//				MyLog.waitHere("directoryImaTime = "+directoryImaTime);
-
 				boolean success2 = sorterUtils8.createDirectory(directoryImaTime);
 				if (!success2)
 					IJ.error("error in createDirectory");
@@ -161,7 +120,6 @@ public class sorterUtils8 {
 					aux11 = filterChar(aux11);
 					aux11 = aux11.trim();
 				}
-				String aux13 = (aux11 + aux12).trim();
 				String aux14 = seriesNum;
 				if (aux14 == null) {
 					aux14 = "null";
@@ -169,31 +127,25 @@ public class sorterUtils8 {
 					aux14 = filterChar(aux14);
 					aux14 = aux14.trim();
 				}
-				
-				
-				//===============================================
+
+				// ===============================================
 				// TENTATIVO MOVIMENTO IMMAGINI
-				//===============================================
+				// ===============================================
 
 				File moveCandidate = new File(lista.get(i1));
-				// Destination directory
-				// IJ.log("directorySeriesName= " + directorySeriesName);
 				File sourceDir = new File(moveCandidate.getParent());
-
-				String oldName2 = moveCandidate.getName();
-
+				String oldName2 = filterChar(moveCandidate.getName());
 				String newSeriesName = seriesNum + "_" + oldName2;
 				String coilX = coil;
 				if (coilX != null) {
 					if (coilX.equals("C:HE1-4")) {
 						coilX = "HE5";
-						oldName2 = newSeriesName + "_" + coilX;
+						oldName2 = coilX + "_" + newSeriesName;
 					} else {
 						String aux1 = coilX.replace(":", "x");
 						String aux2 = aux1.replace(";", "v");
-						oldName2 = newSeriesName + "_" + aux2;
+						oldName2 = aux2 + "_" + newSeriesName;
 					}
-					// IJ.log(seriesDescription);
 					String aux1 = seriesDescription;
 					if (aux1.length() >= 5) {
 						oldName2 = oldName2 + "_" + seriesDescription.substring(0, 5);
@@ -201,54 +153,39 @@ public class sorterUtils8 {
 				}
 
 				String seriesName = "Series_" + aux14;
-//				String aux15 = directoryStudyName + File.separator + seriesName + "_" + coilX + "_pos_" + imaPos;
 				String aux15 = directoryImaTime + File.separator + seriesName;
-//				String aux15 = directoryImaTime + File.separator + seriesName + "_" + coilX + "_pos_" + imaPos;
-				// String directorySeriesName = aux15.replaceAll(" ", "_");
 				String directorySeriesName = aux15;
-				// IJ.log("directorySeriesName= " + directorySeriesName);
-//				MyLog.waitHere("NEWNEW directorySeriesName= " + directorySeriesName);
-				// IJ.log("directoryPatientName= " + directoryPatientName);
-				// IJ.log("studyName= " + studyName);
-				// IJ.log("directoryStudyName= " + directoryStudyName);
-				// IJ.log("seriesName= " + seriesName);
-				// IJ.log("directorySeriesName= " + directorySeriesName);
 				boolean success3 = sorterUtils8.createDirectory(directorySeriesName);
 				if (!success3) {
 					IJ.error("create dir problems " + directorySeriesName);
 				} else {
 
 				}
-
-				File destDir = new File(directorySeriesName);
-
+				String okDirectorySeriesName = filterChar(directorySeriesName);
+				File destDir = new File(okDirectorySeriesName);
 				String newName = "";
 				if (sourceDir.equals(destDir)) {
 				} else {
 					boolean exist2 = false;
 					// verifico inoltre se il nome da assegnare al file da
-					// spostare esista gia' nella dierctory destinazione, in
+					// spostare esista gia' nella directory destinazione, in
 					// questo caso aggiungo, tramite renameFile un numero
 					// crescente.
 					// Rieffettuo il controllo, eventualmente continuando ad
-					// aumentare il numero da aggiungere (loop), finch� il nuovo
+					// aumentare il numero da aggiungere (loop), finche' il nuovo
 					// nome non esista piu' nella directory destinazione.
 					int loop = 0;
 
 					// verifico che il nuovo file and path non abbiano caratteri
 					// proibiti per windows
 					String oldName = filterChar(oldName2);
+					oldName = oldName + ".dcm";
 
 					// MyLog.waitHere("oldName= "+oldName);
-					File newfile2 = new File(destDir, oldName);
-					// IJ.log("oldName= "+oldName+" newFile2= "+newfile2);
-					// MyLog.waitHere("oldName= "+oldName+" newFile2=
-					// "+newfile2);
 
-					// String nuovo = filterChar(newfile2.toString());
-					// if (!nuovo.equals(newfile2.toString()))
-					// MyLog.waitHere("CARATTERE PROIBITO ");
-					// IJ.log("CARATTERE PROIBITO: "+newfile2.toString() );
+					// 150325 aggiungo estensione dcm per test
+
+					File newfile2 = new File(destDir, oldName);
 
 					exist2 = newfile2.exists();
 					while (exist2) {
@@ -273,7 +210,6 @@ public class sorterUtils8 {
 								MyLog.waitHere("EXISTS");
 							if (newfile2.equals(moveCandidate))
 								MyLog.waitHere("SAME");
-
 							IJ.error("move problems " + moveCandidate + " in " + newfile2);
 							MyLog.waitHere("potential lock-up");
 							return false;
@@ -282,23 +218,52 @@ public class sorterUtils8 {
 
 				}
 			}
-		}
-		// carico una situazione "fresca" delle directory
-		String[] list2 = new File(filePath).list();
-		for (int i1 = 0; i1 < list2.length; i1++) {
-			File f1 = new File(filePath + File.separator + list2[i1]);
-			if (sorterUtils8.countFiles(f1.getPath()) == 0) {
-				// boolean delete2 = sorterUtils.deleteDirectoryEmpty(f1);
-				// if (!delete2) {
-				// vuol dire che non riesco o non devo cancellare. BASTA
-				// COSI'
-				// return false;
-				// }
-			}
+			continue;
 		}
 
+		// carico una situazione "fresca" delle directory
+//		String[] list2 = new File(filePath).list();
+//		for (int i1 = 0; i1 < list2.length; i1++) {
+//			File f1 = new File(filePath + File.separator + list2[i1]);
+//			if (sorterUtils7.countFiles(f1.getPath()) == 0) {
+//			}
+//		}
+
 		return true;
-	}// mainMethod
+	}
+
+	/***
+	 * Lettura dell'elemento bobina attivato (per le uncombined - siemens) Sono
+	 * costertto a leggere di nuovo l'immagine per bypassare le immagini passate per
+	 * il PACS
+	 * 
+	 * @param imp1
+	 * @return
+	 */
+	public static String readCoil(String path1) {
+
+		Opener opener1 = new Opener();
+		ImagePlus imp1 = opener1.openImage(path1);
+		String coil1 = readDicomParameter(imp1, DICOM_COIL1); /// 0051, 100F
+		String coil2 = readDicomParameter(imp1, DICOM_COIL2); /// 0021, 114F
+		String coil3 = piedeDiPorco(path1, "21004F10"); /// legge anche le immagini passate nel PACS
+		String coil4 = readDicomParameter(imp1, DICOM_COIL4); //// '0065,1003
+		String coil = "MISS";
+		if (coil1.equals("MISS") == false && coil1.equals("") == false) {
+			coil = coil1;
+		}
+		if (coil2.equals("MISS") == false && coil2.equals("") == false) {
+			coil = coil2;
+		}
+		if (coil3.equals("MISS") == false && coil3.equals("") == false) {
+			coil = coil3;
+		}
+		if (coil4.equals("MISS") == false && coil4.equals("") == false) {
+			coil = coil4;
+		}
+
+		return coil;
+	}
 
 	/**
 	 * Conta i file in maniera ricorsiva
@@ -365,7 +330,8 @@ public class sorterUtils8 {
 		ArrayList<String> list3 = new ArrayList<String>();
 		String[] list2 = new File(filePath).list();
 		for (int i1 = 0; i1 < list2.length; i1++) {
-			String path1 = filePath + File.separator + list2[i1];
+			// String path1 = filePath + File.separator + list2[i1];
+			String path1 = filePath + list2[i1];
 			File f1 = new File(path1);
 			if (f1.isDirectory()) {
 				list3.addAll(listFiles(path1));
@@ -404,7 +370,7 @@ public class sorterUtils8 {
 
 	/**
 	 * La seguente routine, che si occupa di estrarre dati dall'header delle
-	 * immagini � tratta da QueryDicomHeader.java di Anthony Padua & Daniel
+	 * immagini e' tratta da QueryDicomHeader.java di Anthony Padua & Daniel
 	 * Barboriak - Duke University Medical Center. *** modified version *** Alberto
 	 * Duina - Spedali Civili di Brescia - Servizio di Fisica Sanitaria 2006
 	 * 
@@ -468,7 +434,7 @@ public class sorterUtils8 {
 	}
 
 	/***
-	 * cancellazione alternativa di directory piena, ma forse � deleteria, a noi
+	 * cancellazione alternativa di directory piena, ma forse e'deleteria, a noi
 	 * serve di cancellare solo directory vuote, i file devono essere tutti spostati
 	 * in altro luogo
 	 * 
@@ -499,6 +465,13 @@ public class sorterUtils8 {
 		return directory.delete();
 	}
 
+	/***
+	 * Cancellazione di cartella vuota
+	 * 
+	 * @param path
+	 * @return
+	 */
+
 	public static boolean deleteDirectoryEmpty(File path) {
 		if (path.exists()) {
 			if (path.isDirectory()) {
@@ -513,6 +486,13 @@ public class sorterUtils8 {
 		return (path.delete());
 	}
 
+	/**
+	 * Rinomina files
+	 * 
+	 * @param oldName
+	 * @param loop
+	 * @return
+	 */
 	public static String renameFileProgressive(String oldName, int loop) {
 		File tmpFile = new File(oldName);
 		// IJ.log("in renameFile oldName vale " + oldName + " e il loop vale "
@@ -567,6 +547,13 @@ public class sorterUtils8 {
 		return newName;
 	}
 
+	/**
+	 * creazione di una nuova directory
+	 * 
+	 * @param directoryPath
+	 * @return
+	 */
+
 	public static boolean createDirectory(String directoryPath) {
 		boolean exists = (new File(directoryPath)).exists();
 		if (!exists) {
@@ -578,6 +565,13 @@ public class sorterUtils8 {
 		return (exists);
 	}
 
+	/**
+	 * Copia di un file
+	 * 
+	 * @param in
+	 * @param out
+	 * @return
+	 */
 	public static boolean copyFile(File in, File out) {
 		FileInputStream fis = null;
 		try {
@@ -628,13 +622,18 @@ public class sorterUtils8 {
 		return true;
 	}
 
+	/***
+	 * Filtraggio caratteri problematici o che comunque non possono essere usati in
+	 * un path
+	 * 
+	 * @param in1
+	 * @return
+	 */
 	public static String filterChar(String in1) {
 		String tmp1 = in1;
 
 		tmp1 = tmp1.replace("[", "");
 		tmp1 = tmp1.replace("]", "");
-		tmp1 = tmp1.replace("/", "");
-		tmp1 = tmp1.replace("\\", "");
 		tmp1 = tmp1.replace("&", "");
 		tmp1 = tmp1.replace("/", "");
 		tmp1 = tmp1.replace("~", "");
@@ -645,8 +644,13 @@ public class sorterUtils8 {
 		tmp1 = tmp1.replace(">", "");
 		tmp1 = tmp1.replace("\"", "");
 		tmp1 = tmp1.replace(";", "");
-		tmp1 = tmp1.replace(":", "");
 		tmp1 = tmp1.replace("+", "");
+		if (!tmp1.contains(":\\")) {
+			tmp1 = tmp1.replace(":", ""); // non cancella C:\
+		}
+//		tmp1 = tmp1.replace("/", "");
+//		tmp1 = tmp1.replace("\\", "");
+//		tmp1 = tmp1.replace(":", "");   // mi cancellava i : dal c:/
 		return tmp1;
 	}
 
@@ -829,6 +833,12 @@ public class sorterUtils8 {
 		return list3;
 	}
 
+	/**
+	 * estrae il filename dal path
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public static String extractFileName2(String path) {
 
 		int pos = path.lastIndexOf(File.separator);
@@ -836,6 +846,13 @@ public class sorterUtils8 {
 		return fileName;
 	}
 
+	/**
+	 * Copia di una cartella con files
+	 * 
+	 * @param srcFolder
+	 * @param destFolder
+	 * @return
+	 */
 	public static boolean copyDirectoryWithFiles(String srcFolder, String destFolder) {
 
 		boolean ok = false;
@@ -856,6 +873,14 @@ public class sorterUtils8 {
 		return ok;
 	}
 
+	/**
+	 * Copia di una cartella
+	 * 
+	 * @param src
+	 * @param dest
+	 * @return
+	 * @throws IOException
+	 */
 	public static boolean copyFolder(File src, File dest) throws IOException {
 
 		boolean ok = true;
@@ -903,6 +928,12 @@ public class sorterUtils8 {
 		return ok;
 	}
 
+	/**
+	 * Da ArrayList a vettore di stringhe
+	 * 
+	 * @param inArrayList
+	 * @return
+	 */
 	public static String[] arrayListToArrayString(List<String> inArrayList) {
 		Object[] objArr = inArrayList.toArray();
 		String[] outStrArr = new String[objArr.length];
@@ -912,6 +943,12 @@ public class sorterUtils8 {
 		return outStrArr;
 	}
 
+	/**
+	 * Verifica che sia Dicom
+	 * 
+	 * @param fileName1
+	 * @return
+	 */
 	public static boolean isDicomImage(String fileName1) {
 		// IJ.redirectErrorMessages();
 		int type = (new Opener()).getFileType(fileName1);
@@ -930,4 +967,186 @@ public class sorterUtils8 {
 		}
 	}
 
-} // sorterUtils
+	/***
+	 * Questo workaround deriva da ReadAscconv e va utilizzato per leggere parametri
+	 * dell'header ignorati da ImageJ, solitamente legati all'incauto passaggio
+	 * delle immagini attraverso i PACS. (CAPRE, CAPRE, CAPRE ....) IW2AYV nota bene
+	 * che questo file lavora solo per macchine Siemens EFFETTUA UNA LETTURA
+	 * DIRETTAMENTE NEI DATI ESADECIMALI, poichè il TAG non viene più visto da
+	 * ImageJ
+	 * 
+	 * @param path1
+	 * @param ricerca
+	 * @return
+	 */
+
+	public static String piedeDiPorco(String fileName1, String tag) {
+		int len1;
+
+		// MyLog.waitHere("tag= " + tag);
+		// restituisco i valori solo se macchina siemens
+		byte[] x3 = hexStringToByteArray("08007000");
+
+		byte[] x1 = hexStringToByteArray(tag);
+		String out1 = "";
+		String costruttore = "";
+		String confronto = "Siemens ";
+
+		try {
+			BufferedInputStream f1 = new BufferedInputStream(new FileInputStream(fileName1));
+			len1 = f1.available();
+			byte[] buffer1 = new byte[len1];
+			f1.read(buffer1, 0, len1); // get copy of entire file as byte[]
+			f1.close();
+
+			// cerco in buffer1 il tag di fine header, serve per evitare di sconfinare nei
+			// byte dei pixel immagine
+			byte[] y1 = new byte[4];
+			y1[0] = (byte) 0xE0;
+			y1[1] = (byte) 0x7F;
+			y1[2] = (byte) 0x10;
+			y1[3] = (byte) 0x00;
+			int offset1 = localizeHexWord(buffer1, y1, buffer1.length);
+			// MyLog.waitHere("offset1= " + offset1);
+			int offset2 = localizeHexWord(buffer1, x1, offset1);
+			// MyLog.waitHere("offset2= " + offset2);
+			int offset3 = localizeHexWord(buffer1, x3, offset1);
+			offset3 = offset3 + 4;
+			// MyLog.waitHere("offset3= " + offset3);
+
+			byte[] buffer4 = new byte[8];
+			for (int i1 = 0; i1 < 8; i1++) {
+				buffer4[i1] = buffer1[offset3 + 4 + i1];
+			}
+			costruttore = new String(buffer4);
+			// MyLog.waitHere("costruttore= " + costruttore);
+			if (costruttore.equals(confronto)) {
+			} else {
+				return "MISS";
+			}
+
+			short len2 = Short.parseShort(byte2hex(buffer1[offset2 + 4]), 16);
+			offset2 = offset2 + 8;
+
+			// MyLog.waitHere("tag= " + tag + " len2= " + len2);
+
+			byte[] buffer3 = new byte[len2];
+
+			for (int i1 = 0; i1 < len2; i1++) {
+				buffer3[i1] = buffer1[offset2 + i1];
+			}
+
+			byte[] buffer2 = new byte[len2];
+
+			for (int i1 = 0; i1 < len2; i1++) {
+				buffer2[i1] = buffer1[offset2 + i1];
+			}
+
+			out1 = new String(buffer2);
+
+			/// IJ.log("output >>> " + out1);
+
+		} catch (Exception e) {
+			IJ.showMessage("piedeDiPorco>>> ", "Exception " + "\n \n\"" + e.getMessage() + "\"");
+		}
+
+		if (costruttore.equals(confronto)) {
+			return out1;
+		} else
+			return "MISS";
+	}
+
+	/**
+	 * 
+	 * @param bImage
+	 * @param what
+	 * @param limit
+	 * @return
+	 */
+	public static int localizeHexWord(byte[] bImage, byte[] what, int limit) {
+		int conta = 0;
+		int locazione = 0;
+
+		// IJ.log("what =" + byte2hex(what[0]) + byte2hex(what[1])
+		// + byte2hex(what[2]) + byte2hex(what[3]));
+
+		for (int i1 = 0; i1 < limit - 4; i1++) {
+
+			if (bImage[i1 + 0] == what[0] && bImage[i1 + 1] == what[1] && bImage[i1 + 2] == what[2]
+					&& bImage[i1 + 3] == what[3]) {
+				locazione = i1;
+				conta++;
+				// IJ.log("conta=" + conta + " locazione=" + locazione);
+				break;
+			}
+		}
+
+		if (conta > 0) {
+			return locazione;
+		} else {
+			return -1; // non trovato
+		}
+	}
+
+	/**
+	 * 
+	 * @param by
+	 * @return
+	 */
+	public static String byte2hex(byte by) {
+		char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+		char[] buf2 = new char[2];
+		buf2[1] = hexDigits[by & 0xf];
+		by >>>= 4;
+		buf2[0] = hexDigits[by & 0xf];
+		return new String(buf2);
+	} // end byte2hex
+
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static final byte[] short2Byte(short s) {
+		byte[] out = new byte[2];
+
+		out[0] = (byte) ((s >>> 8) & 0xFF);
+		out[1] = (byte) ((s >>> 0) & 0xFF);
+
+		return out;
+	}
+
+	/***
+	 * conversione da string hexto byte array s1 deve essere di lunghezza pari
+	 * 
+	 * @param s1
+	 * @return
+	 */
+	public static byte[] hexStringToByteArray(String s1) {
+		// MyLog.waitHere("s1= " + s1);
+		int len = s1.length();
+		byte[] data = new byte[len / 2];
+		for (int i1 = 0; i1 < len; i1 += 2) {
+			data[i1 / 2] = (byte) ((Character.digit(s1.charAt(i1), 16) << 4) + Character.digit(s1.charAt(i1 + 1), 16));
+		}
+		return data;
+	}
+
+	public String getString(BufferedInputStream bo, int start, int len) throws IOException {
+
+		IJ.log("entro in getString");
+		int pos = 1;
+		IJ.log("getString 001");
+		byte[] buf = new byte[len];
+		IJ.log("getString 002");
+		int size = bo.available();
+		IJ.log("getString 003");
+		while (pos < len) {
+			int count = bo.read(buf, pos, len);
+			pos += count;
+		}
+		IJ.log("buf= " + buf);
+		return new String(buf);
+	}
+
+}

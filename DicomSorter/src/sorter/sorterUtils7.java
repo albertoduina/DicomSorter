@@ -28,6 +28,11 @@ public class sorterUtils7 {
 	private final static String DICOM_COIL1 = "0051,100F";
 	private final static String DICOM_COIL2 = "0021,114F";
 
+	/***
+	 * 
+	 * @param filePath
+	 * @return
+	 */
 	public static boolean mainMethod(String filePath) {
 		long totale = sorterUtils7.countFiles(filePath);
 		String path1 = "";
@@ -1091,5 +1096,9 @@ public class sorterUtils7 {
 		IJ.log("buf= " + buf);
 		return new String(buf);
 	}
+
+	
+	
+
 
 }

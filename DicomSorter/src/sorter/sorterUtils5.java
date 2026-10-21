@@ -6,12 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -25,32 +21,18 @@ import utils.ReadDicom;
 public class sorterUtils5 {
 
 	private final static String DICOM_PATIENT_NAME = "0010,0010";
-
 	private final static String DICOM_STUDY_DATE = "0008,0020";
-
 	private final static String DICOM_SEQUENCE_NAME = "0018,0024";
-
 	private final static String DICOM_ACQUISITION_TIME = "0008,0032";
-
 	private final static String DICOM_PROTOCOL_NAME = "0008,1030";
-
 	private final static String DICOM_SERIES_DESCRIPTION = "0008,103E";
-
 	private final static String DICOM_STUDY_ID = "0020,0010";
-
 	private final static String DICOM_SERIES_NUMBER = "0020,0011";
-
 	private final static String DICOM_ACQUISITION_NUMBER = "0020,0012";
-
 	private final static String DICOM_COIL1 = "0051,100F";
-
 	private final static String DICOM_COIL2 = "0021,114F";
-
 	private final static String DICOM_IMAGE_NUMBER = "0020,0013";
-
 	private final static String DICOM_IMAGE_POSITION = "0020,0032";
-
-	private static final int EOF = '\uffff';
 
 	public static boolean mainMethod(String filePath) {
 		long totale = sorterUtils5.countFiles(filePath);
@@ -72,17 +54,12 @@ public class sorterUtils5 {
 					break label1;
 				IJ.redirectErrorMessages(true);
 				String patName = readDicomParameter(imp1, DICOM_PATIENT_NAME);
-				String seqName = readDicomParameter(imp1, DICOM_SEQUENCE_NAME);
 				String studyID = readDicomParameter(imp1, DICOM_STUDY_ID);
 				String studyDate = readDicomParameter(imp1, DICOM_STUDY_DATE);
 				String seriesNum = readDicomParameter(imp1, DICOM_SERIES_NUMBER);
 				String seriesDescription = readDicomParameter(imp1, DICOM_SERIES_DESCRIPTION);
-				String imaNum = readDicomParameter(imp1, DICOM_IMAGE_NUMBER);
 				String imaPos2 = readDicomParameter(imp1, DICOM_IMAGE_POSITION);
 				String imaPos = imaPos2.replace("\\", "_");
-				// MyLog.waitHere("imaPos= " + imaPos);
-				String acqNum = readDicomParameter(imp1, DICOM_ACQUISITION_NUMBER);
-				String acqTime = readDicomParameter(imp1, DICOM_ACQUISITION_TIME);
 				String coil1 = readDicomParameter(imp1, DICOM_COIL1);
 				String coil2 = readDicomParameter(imp1, DICOM_COIL2);
 				String coil = "MISS";
@@ -90,10 +67,9 @@ public class sorterUtils5 {
 					coil = coil1;
 				if (coil2.equals("MISS") == false)
 					coil = coil2;
-				IJ.log("seqName= " + seqName + " coil1= " + coil1 + " coil2= " + coil2 + " coil= " + coil);
+				//IJ.log("seqName= " + seqName + " coil1= " + coil1 + " coil2= " + coil2 + " coil= " + coil);
 
 				String protocolName = readDicomParameter(imp1, DICOM_PROTOCOL_NAME);
-				String fileName = imp1.getTitle();
 				if (patName == null)
 					continue;
 

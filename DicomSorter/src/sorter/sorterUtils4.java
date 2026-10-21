@@ -6,12 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -189,10 +185,10 @@ public class sorterUtils4 {
 					// proibiti per windows
 					String oldName = filterChar(oldName2);
 
-					MyLog.waitHere("oldName= "+oldName);
+//					MyLog.waitHere("oldName= "+oldName);
 					File newfile2 = new File(destDir, oldName);
 					IJ.log("oldName= "+oldName+" newFile2= "+newfile2);
-					MyLog.waitHere("oldName= "+oldName+" newFile2="+newfile2);
+//					MyLog.waitHere("oldName= "+oldName+" newFile2="+newfile2);
 
 					// String nuovo = filterChar(newfile2.toString());
 					// if (!nuovo.equals(newfile2.toString()))
